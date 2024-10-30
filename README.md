@@ -49,3 +49,8 @@ The JC3248W535 is a versatile LCD that can be easily integrated with MicroPython
 # PIN_NUM_QSPI_TOUCH_INT  (-1)
 
 ```
+
+## Progress
+
+- Firmware: https://github.com/lvgl-micropython/lvgl_micropython/
+- https://github.com/lvgl-micropython/lvgl_micropython/discussions/161
