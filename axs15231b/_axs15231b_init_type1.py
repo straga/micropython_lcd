@@ -60,96 +60,53 @@ def init(self):
     param_buf = bytearray(15)
     param_mv = memoryview(param_buf)
 
-    self.set_params(0xBB, bytearray([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x5A, 0xA5]))
+    # Custom CMD sequense
+
+    # # Open Special mode
+    # self.set_params(0xBB, bytearray([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x5A, 0xA5]))
+    # time.sleep_ms(10)
+    #
+    # # self.set_params(0xC1, bytearray([0x33]))
+    # # time.sleep_ms(10)
+    #
+    # # Close Special mode
+    # self.set_params(0xBB, bytearray([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]))
+    # time.sleep_ms(10)
+
+    # Color and Orientation
+    param_buf[0] = (
+        self._madctl(
+            self._color_byte_order,
+            self._ORIENTATION_TABLE  # NOQA
+        )
+    )
+    self.set_params(AXS_LCD_MADCTL, param_mv[:1])
+
+    # Pixel size
+    color_size = lv.color_format_get_size(self._color_space)
+    if color_size == 2:
+        pixel_format = 0x55
+    else:
+        pixel_format = 0x66
+
+    param_buf[0] = pixel_format
+    self.set_params(AXS_LCD_IPF, param_mv[:1])
+
+    # 0xD0 BRIGHTNESS
+    param_buf[0] = 0xD0
+    self.set_params(AXS_LCD_WRDISBV, param_mv[:1])
+
+    # # Disable Partial Display Mode (return to Normal Display Mode)
+    self.set_params(AXS_LCD_NORON)
     time.sleep_ms(10)
-
-    self.set_params(0xC1, bytearray([0x33]))
-    time.sleep_ms(10)
-
-    self.set_params(0xBB, bytearray([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]))
-    time.sleep_ms(10)
-
-    #  AXS_LCD_DISPOFF
-    param_buf[0] = 0x00
-    self.set_params(AXS_LCD_DISPOFF, param_mv[:1])
-    time.sleep_ms(20)
-
-    #  AXS_LCD_SLPIN
-    param_buf[0] = 0x00
-    self.set_params(AXS_LCD_SLPIN, param_mv[:1])
-    time.sleep_ms(150)
 
     #  AXS_LCD_SLPOUT
-    param_buf[0] = 0x00
-    self.set_params(AXS_LCD_SLPOUT, param_mv[:1])
+    self.set_params(AXS_LCD_SLPOUT)
     time.sleep_ms(150)
-
-
-    #AXS_LCD_INVOFF = 0x20;
-    #AXS_LCD_INVON = 0x21;
-    # invert color
-    # param_buf[0] = 0x00
-    # self.set_params(AXS_LCD_INVON, param_mv[:1])
-
-    # PIXEL FORMAT
-    # Set Interface Pixel Format to 16 bits per pixel (RGB565)
-    # param_buf[0] = 0x55  # 16-bit color (RGB565)
-    # self.set_params(AXS_LCD_IPF, param_mv[:1])
-
-    # # Set Interface Pixel Format to 24 bits per pixel (RGB888)
-    # param_buf[0] = 0x77  # 24-bit color (RGB888)
-    # self.set_params(AXS_LCD_IPF, param_mv[:1])
-
-    # MADCTL
-    # Configure Memory Data Access Control (MADCTL)
-    madctl = 0x00  # Start with all bits cleared
-
-    # Set the bits as needed:
-    # madctl |= (1 << 7)  # MY (Row Address Order)
-    # madctl |= (1 << 6)  # MX (Column Address Order)
-    # madctl |= (1 << 5)  # MV (Row/Column Exchange)
-    # madctl |= (1 << 4)  # ML (Vertical Refresh Order)
-    # madctl |= (0 << 3)  # RGB order (0 for RGB, 1 for BGR)
-    # madctl |= (1 << 2)  # MH (Horizontal Refresh Order)
-    # madctl |= (1 << 1)  # cr_ca (Data Invert Option)
-    # madctl |= (1 << 0)  # cr_gs (GIP Scan Direction)
-
-    # For RGB565 with normal orientation, we typically don't need to set any bits
-    param_buf[0] = madctl
-    self.set_params(AXS_LCD_MADCTL, param_mv[:1])
-    time.sleep_ms(10)
-
-
-    # # Enable Partial Display Mode
-    # param_buf[0] = 0x00
-    # self.set_params(AXS_LCD_PTLON, param_mv[:1])
-    # time.sleep_ms(10)
-    #
-    # # Set partial area (example values, adjust as needed)
-    # param_buf[:4] = bytearray([0x00, 0x50, 0x01, 0x00])  # Start row: 0x0050, End row: 0x0100
-    # self.set_params(AXS_LCD_PTLAR, param_mv[:4])
-    # time.sleep_ms(10)
-    #
-    # param_buf[:4] = bytearray([0x00, 0x00, 0x00, 0xF0])  # Start column: 0x0000, End column: 0x00F0
-    # self.set_params(AXS_LCD_PTLARC, param_mv[:4])
-    # time.sleep_ms(10)
-
-    # Optional: Set color for non-partial area (if supported by your display)
-    # param_buf[:3] = bytearray([0xFF, 0xFF, 0xFF])  # White color (adjust as needed)
-    # self.set_params(SOME_COLOR_SETTING_COMMAND, param_mv[:3])
-    # time.sleep_ms(10)
-
-    # Disable Partial Display Mode (return to Normal Display Mode)
-    param_buf[0] = 0x00
-    self.set_params(AXS_LCD_NORON, param_mv[:1])
-    time.sleep_ms(10)
-
 
     #  AXS_LCD_DISPON
-    param_buf[0] = 0x00
-    self.set_params(AXS_LCD_DISPON, param_mv[:1])
+    self.set_params(AXS_LCD_DISPON)
     time.sleep_ms(150)
-
 
     # TEST
     # print("All pixel RED")

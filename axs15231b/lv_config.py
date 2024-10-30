@@ -1,22 +1,20 @@
 
 from micropython import const # NOQA
 
-WIDTH = const(320)
-HEIGHT = const(480)
-
-
 import lcd_bus # NOQA
 from machine import SPI, Pin # NOQA
 
 import lvgl as lv # NOQA
 
-# BUFFER_SIZE = int(WIDTH * HEIGHT) * 2
-# BUFFER_SIZE = int(BUFFER_SIZE // 10)
+WIDTH = const(320)
+HEIGHT = const(480)
+BUFFER_SIZE = int(WIDTH * HEIGHT) * 2
+BUFFER_FLAG = lcd_bus.MEMORY_SPIRAM
 
 
 ## Panel
 
-# LCD_QSPI_HOST           (SPI2_HOST)     SPI2_HOST=1,
+# LCD_QSPI_HOST           (SPI2_HOST)     SPI2_HOST=1, ok
 
 # PIN_NUM_QSPI_CS         (GPIO_NUM_45) ok
 # PIN_NUM_QSPI_PCLK       (GPIO_NUM_47) ok
@@ -26,23 +24,23 @@ import lvgl as lv # NOQA
 # PIN_NUM_QSPI_DATA2      (GPIO_NUM_40) ok
 # PIN_NUM_QSPI_DATA3      (GPIO_NUM_39) ok
 
-# PIN_NUM_QSPI_RST        (GPIO_NUM_NC)
+# PIN_NUM_QSPI_RST        (GPIO_NUM_NC) NC
 # PIN_NUM_QSPI_DC         (GPIO_NUM_8) ok
 # PIN_NUM_QSPI_TE         (GPIO_NUM_38)
 # PIN_NUM_QSPI_BL         (GPIO_NUM_1) ok
 
 ## Touch
 
-# I2C_NUM                     (I2C_NUM_0)
-# I2C_CLK_SPEED_HZ            400000
+# I2C_NUM                     (I2C_NUM_0) ok
+# I2C_CLK_SPEED_HZ            400000 ok
 
-# PIN_NUM_QSPI_TOUCH_SCL  (GPIO_NUM_8)
-# PIN_NUM_QSPI_TOUCH_SDA  (GPIO_NUM_4)
+# PIN_NUM_QSPI_TOUCH_SCL  (GPIO_NUM_8) ok
+# PIN_NUM_QSPI_TOUCH_SDA  (GPIO_NUM_4) ok
 # PIN_NUM_QSPI_TOUCH_RST  (-1)
 # PIN_NUM_QSPI_TOUCH_INT  (-1)
 
 '''
-config from C code
+config from vendor C code 
 {                                                          
     .cs_gpio_num = cs,                                     
     .dc_gpio_num = -1,                                      
@@ -52,7 +50,6 @@ config from C code
     .lcd_cmd_bits = 32,                                     
     .lcd_param_bits = 8,                                                     
     .quad_mode = true,                                 
-                                                   
 }
 '''
 
@@ -64,7 +61,6 @@ spi_bus = SPI.Bus(
     sck=47,   # PIN_NUM_QSPI_PCLK
     quad_pins=(40, 39),  # PIN_NUM_QSPI_DATA2, PIN_NUM_QSPI_DATA3
 )
-
 
 # Display bus config
 '''
@@ -87,7 +83,7 @@ display_bus = lcd_bus.SPIBus(
     dc=8,  # PIN_NUM_QSPI_DC 8
     cs=45,  # PIN_NUM_QSPI_CS
     freq=40000000,
-    spi_mode=3,
+    spi_mode=0,
     quad=True
 )
 
@@ -114,21 +110,19 @@ import axs15231b
 # _param_bits = 8,
 # _init_bus = True
 
-#fb1 = display_bus.allocate_framebuffer(BUFFER_SIZE, lcd_bus.MEMORY_SPIRAM) #lcd_bus.MEMORY_INTERNAL | lcd_bus.MEMORY_DMA)  lcd_bus.MEMORY_SPIRAM
-#fb2 = display_bus.allocate_framebuffer(BUFFER_SIZE, lcd_bus.MEMORY_SPIRAM) #lcd_bus.MEMORY_INTERNAL | lcd_bus.MEMORY_DMA)  lcd_bus.MEMORY_SPIRAM
-
 display = axs15231b.AXS15231B(
     display_bus,
     WIDTH,
     HEIGHT,
-    #frame_buffer1=fb1,
-    #frame_buffer2=fb2,
+    frame_buffer1=display_bus.allocate_framebuffer(BUFFER_SIZE, BUFFER_FLAG),
+    frame_buffer2=None,
     backlight_pin=1,
     _cmd_bits=32,
     color_space=lv.COLOR_FORMAT.RGB565,
     rgb565_byte_swap=True,
     # backlight_on_state=axs15231b.STATE_PWM, https://github.com/micropython/micropython/pull/16090
 )
+
 
 print('Hello LCD')
 print(f"Display size: {WIDTH}x{HEIGHT}")
@@ -140,6 +134,11 @@ display.set_backlight(100)
 
 display.init(1)  # use 1 type config
 
+
+# TOUCH
+
+
+# Not need calibration now
 class TouchCal:
     def __init__(self):
         self.alphaX = None
@@ -159,8 +158,6 @@ class TouchCal:
 # PIN_NUM_QSPI_TOUCH_SCL  (GPIO_NUM_8)
 # PIN_NUM_QSPI_TOUCH_SDA  (GPIO_NUM_4)
 
-
-
 import axs15231_touch
 from i2c import I2C
 
@@ -176,40 +173,37 @@ print('is_calibrate is', touch.is_calibrated)
 # import task_handler
 # th = task_handler.TaskHandler()
 #
-#
-#
 # print('Hello LVGL')
 #
 # scr = lv.screen_active()
 # scr.set_style_bg_color(lv.color_hex(0x000000), 0)
 #
-#
 # print('Left TOP')
 # # Left TOP
 # rect = lv.obj(scr)
-# rect.set_size(50, 50)
+# rect.set_size(size_x, size_y)
 # rect.set_pos(0, 0)
 # rect.set_style_bg_color(lv.color_make(255, 0, 0), 0) # red
 #
 # print('Right TOP')
 # # Right TOP
 # rect = lv.obj(scr)
-# rect.set_size(50, 50)
-# rect.set_pos(WIDTH-50, 0)
+# rect.set_size(size_x, size_y)
+# rect.set_pos(WIDTH-size_x, 0)
 # rect.set_style_bg_color(lv.color_make(0, 255, 0), 0) # green
 #
 # print('Left BOTTOM')
 # # Left BOTTOM
 # rect = lv.obj(scr)
-# rect.set_size(50, 50)
-# rect.set_pos(0, HEIGHT-50)
+# rect.set_size(size_x, size_y)
+# rect.set_pos(0, HEIGHT-size_y)
 # rect.set_style_bg_color(lv.color_make(0, 0, 255), 0) # blue
 #
 # print('Right BOTTOM')
 # # Right BOTTOM
 # rect = lv.obj(scr)
-# rect.set_size(50, 50)
-# rect.set_pos(WIDTH-50, HEIGHT-50)
+# rect.set_size(size_x, size_y)
+# rect.set_pos(WIDTH-size_x, HEIGHT-size_y)
 # rect.set_style_bg_color(lv.color_make(255, 255, 255), 0) # white
 #
 # # Draw cross lines from inner corners to inner corners
@@ -218,12 +212,12 @@ print('is_calibrate is', touch.is_calibrated)
 #
 # # Define points for the lines
 # points1 = [
-#     {"x": 50, "y": 50},                  # Inner top-left corner
-#     {"x": WIDTH - 50, "y": HEIGHT - 50}  # Inner bottom-right corner
+#     {"x": size_x, "y": size_y},                  # Inner top-left corner
+#     {"x": WIDTH - size_x, "y": HEIGHT - size_y}  # Inner bottom-right corner
 # ]
 # points2 = [
-#     {"x": WIDTH - 50, "y": 50},          # Inner top-right corner
-#     {"x": 50, "y": HEIGHT - 50}          # Inner bottom-left corner
+#     {"x": WIDTH - size_x, "y": size_y},          # Inner top-right corner
+#     {"x": size_x, "y": HEIGHT - size_y}          # Inner bottom-left corner
 # ]
 #
 # # Set the points for the lines
@@ -241,12 +235,12 @@ print('is_calibrate is', touch.is_calibrated)
 # #
 # # Slider
 # slider = lv.slider(scr)
-# slider.set_size(200, 50)
+# slider.set_size(slide_x, slide_y)
 # slider.center()
 #
 # label = lv.label(scr)
 # label.set_text(f"{WIDTH}x{HEIGHT}")
-# label.align(lv.ALIGN.CENTER, 0, -100)
+# label.align(lv.ALIGN.CENTER, 0, text_y)
 # label.set_style_text_font(lv.font_montserrat_16, 0)
-
+#
 
