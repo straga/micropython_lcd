@@ -9,10 +9,10 @@ We're using the JC3248W535 LCD display, which is compatible with MicroPython. Th
 <img src="./doc/lcd_1.jpg" alt="LCD Front View" width="33%" />
 <img src="./doc/lcd_2.jpg" alt="LCD Back View" width="33%" />
 
-The JC3248W535 is a versatile LCD that can be easily integrated with MicroPython-capable microcontrollers like ESP32 or Raspberry Pi Pico.
+The JC3248W535 is a versatile LCD that can be easily integrated with MicroPython-capable microcontrollers like ESP32.
 
 ## Features
-
+- ESP32-S3 3.5-inch capacitive touch IPS module 8M PSRAM 16M 320*480
 - Compatible with MicroPython
 - Model: JC3248W535
 - LCD: axs15231b QSPI
