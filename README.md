@@ -49,9 +49,17 @@ The JC3248W535 is a versatile LCD that can be easily integrated with MicroPython
 # PIN_NUM_QSPI_TOUCH_INT  (-1)
 
 ```
+## Driver
+- https://github.com/straga/micropython_lcd/tree/master/device/JC3248W535/driver
+
+## Firmware
+- For upload: https://github.com/straga/micropython_lcd/tree/master/device/JC3248W535/firmware
+
+## Board for Micropython
+- https://github.com/straga/micropython_lcd/tree/master/device/JC3248W535/board
 
 ## Info
 
-- Already build firmware: https://github.com/straga/micropython_lcd/tree/master/device/JC3248W535/firmware
+
 - For build Firmware with lvgl: https://github.com/lvgl-micropython/lvgl_micropython/
 - Driver progress: https://github.com/lvgl-micropython/lvgl_micropython/discussions/161
