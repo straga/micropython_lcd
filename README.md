@@ -50,7 +50,7 @@ The JC3248W535 is a versatile LCD that can be easily integrated with MicroPython
 
 ```
 ## Driver
-- https://github.com/straga/micropython_lcd/tree/master/device/JC3248W535/driver
+- https://github.com/straga/micropython_lcd/tree/master/device/JC3248W535/driver/axs15231b
 
 ## Firmware
 - For upload: https://github.com/straga/micropython_lcd/tree/master/device/JC3248W535/firmware
