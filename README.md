@@ -50,7 +50,8 @@ The JC3248W535 is a versatile LCD that can be easily integrated with MicroPython
 
 ```
 
-## Progress
+## Info
 
-- Firmware: https://github.com/lvgl-micropython/lvgl_micropython/
-- https://github.com/lvgl-micropython/lvgl_micropython/discussions/161
+- Already build firmware: https://github.com/straga/micropython_lcd/tree/master/device/JC3248W535/firmware
+- For build Firmware with lvgl: https://github.com/lvgl-micropython/lvgl_micropython/
+- Driver progress: https://github.com/lvgl-micropython/lvgl_micropython/discussions/161
