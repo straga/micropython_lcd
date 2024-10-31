@@ -120,7 +120,7 @@ display = axs15231b.AXS15231B(
     _cmd_bits=32,
     color_space=lv.COLOR_FORMAT.RGB565,
     rgb565_byte_swap=True,
-    # backlight_on_state=axs15231b.STATE_PWM, https://github.com/micropython/micropython/pull/16090
+    backlight_on_state=axs15231b.STATE_PWM
 )
 
 
@@ -128,7 +128,7 @@ print('Hello LCD')
 print(f"Display size: {WIDTH}x{HEIGHT}")
 
 display.set_power(True)
-display.set_backlight(100)
+display.set_backlight(80)
 # PWM frequency for backlight
 #display._backlight_pin.freq(2000)
 
@@ -169,78 +169,5 @@ touch = axs15231_touch.AXS15231(touch_i2c, touch_cal=cal, debug=False)
 
 print('is_calibrate is', touch.is_calibrated)
 
-# # LVGL TEST
-# import task_handler
-# th = task_handler.TaskHandler()
-#
-# print('Hello LVGL')
-#
-# scr = lv.screen_active()
-# scr.set_style_bg_color(lv.color_hex(0x000000), 0)
-#
-# print('Left TOP')
-# # Left TOP
-# rect = lv.obj(scr)
-# rect.set_size(size_x, size_y)
-# rect.set_pos(0, 0)
-# rect.set_style_bg_color(lv.color_make(255, 0, 0), 0) # red
-#
-# print('Right TOP')
-# # Right TOP
-# rect = lv.obj(scr)
-# rect.set_size(size_x, size_y)
-# rect.set_pos(WIDTH-size_x, 0)
-# rect.set_style_bg_color(lv.color_make(0, 255, 0), 0) # green
-#
-# print('Left BOTTOM')
-# # Left BOTTOM
-# rect = lv.obj(scr)
-# rect.set_size(size_x, size_y)
-# rect.set_pos(0, HEIGHT-size_y)
-# rect.set_style_bg_color(lv.color_make(0, 0, 255), 0) # blue
-#
-# print('Right BOTTOM')
-# # Right BOTTOM
-# rect = lv.obj(scr)
-# rect.set_size(size_x, size_y)
-# rect.set_pos(WIDTH-size_x, HEIGHT-size_y)
-# rect.set_style_bg_color(lv.color_make(255, 255, 255), 0) # white
-#
-# # Draw cross lines from inner corners to inner corners
-# line1 = lv.line(scr)
-# line2 = lv.line(scr)
-#
-# # Define points for the lines
-# points1 = [
-#     {"x": size_x, "y": size_y},                  # Inner top-left corner
-#     {"x": WIDTH - size_x, "y": HEIGHT - size_y}  # Inner bottom-right corner
-# ]
-# points2 = [
-#     {"x": WIDTH - size_x, "y": size_y},          # Inner top-right corner
-#     {"x": size_x, "y": HEIGHT - size_y}          # Inner bottom-left corner
-# ]
-#
-# # Set the points for the lines
-# line1.set_points(points1, 2)
-# line2.set_points(points2, 2)
-#
-# # Set line colors (white in this case)
-# line1.set_style_line_color(lv.color_make(255, 255, 255), 0)
-# line2.set_style_line_color(lv.color_make(255, 255, 255), 0)
-#
-# # Set line width
-# line1.set_style_line_width(2, 0)
-# line2.set_style_line_width(2, 0)
-# #
-# #
-# # Slider
-# slider = lv.slider(scr)
-# slider.set_size(slide_x, slide_y)
-# slider.center()
-#
-# label = lv.label(scr)
-# label.set_text(f"{WIDTH}x{HEIGHT}")
-# label.align(lv.ALIGN.CENTER, 0, text_y)
-# label.set_style_text_font(lv.font_montserrat_16, 0)
-#
+
 

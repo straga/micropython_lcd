@@ -1,0 +1,1 @@
+include("$(PORT_DIR)/boards/STRAGA/manifest.py")
