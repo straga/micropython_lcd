@@ -32,6 +32,8 @@ _MADCTL_MV = const(0x20)  # 0=Normal, 1=Row/column exchange
 _MADCTL_MX = const(0x40)  # 0=Left to Right, 1=Right to Left
 _MADCTL_MY = const(0x80)  # 0=Top to Bottom, 1=Bottom to Top
 
+CHUNK_SIZE = 10
+
 
 class AXS15231B(display_driver_framework.DisplayDriver):
 
@@ -126,7 +128,7 @@ class AXS15231B(display_driver_framework.DisplayDriver):
         In KB: 307,200 / 1024 ≈ 300 KB
         '''
 
-        chunk_size = 1024 * 50
+        chunk_size = 1024 * CHUNK_SIZE
         for i in range(0, size, chunk_size):
             chunk = data_view[i:i + chunk_size]
             if i == 0:
