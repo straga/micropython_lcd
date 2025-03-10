@@ -134,6 +134,14 @@ class NV3041A(display_driver_framework.DisplayDriver):
         self.__ramwrc = self.__color_cmd_modifier(_RAMWRC)
         self.__caset = self.__cmd_modifier(_CASET)
         self.__flush_ready_count = 0
+        
+        # Optimize chunk size calculations
+        bytes_per_pixel = lv.color_format_get_size(color_space)
+        total_pixels = display_width * display_height
+        self.__chunk_size = const(1024 * 10)  # 10KB chunks
+        self.__total_size = total_pixels * bytes_per_pixel
+        self.__num_chunks = (self.__total_size + self.__chunk_size - 1) // self.__chunk_size
+
 
         super().__init__(
             data_bus,
@@ -163,7 +171,7 @@ class NV3041A(display_driver_framework.DisplayDriver):
         # make sure that flush ready is only called after the second part
         # of the buffer has sent.
         self.__flush_ready_count += 1
-        if self.__flush_ready_count == 2:
+        if self.__flush_ready_count == self.__num_chunks:
             self._disp_drv.flush_ready()
             self.__flush_ready_count = 0
 
@@ -200,10 +208,18 @@ class NV3041A(display_driver_framework.DisplayDriver):
 
         data_view = color_p.__dereference__(size)
 
-        chunk_size = 1024 * 10
-        for i in range(0, size, chunk_size):
-            chunk = data_view[i:i + chunk_size]
-            if i == 0:
+        # Optimized chunking loop
+        remaining = size
+        offset = 0
+
+        while remaining > 0:
+            chunk_size = min(self.__chunk_size, remaining)
+            chunk = data_view[offset:offset + chunk_size]
+            
+            if offset == 0:
                 self._data_bus.tx_color(self.__ramwr, chunk, x1, y1, x2, y2, self._rotation, False)
             else:
-                self._data_bus.tx_color(self.__ramwrc, chunk, x1, y1, x2, y2,  self._rotation, self._disp_drv.flush_is_last())
+                self._data_bus.tx_color(self.__ramwrc, chunk, x1, y1, x2, y2, self._rotation, self._disp_drv.flush_is_last())
+            
+            offset += chunk_size
+            remaining -= chunk_size
