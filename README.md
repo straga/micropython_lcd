@@ -29,6 +29,7 @@ For detailed information about this display, see the [JC3248W535 how to](./devic
  Features
 - ESP32-S3 4.3-inch capacitive touch IPS module 8M PSRAM 4M 480*270
 - Compatible with MicroPython
+- Model: JC4827W543
 - LCD: NV3041A QSPI
 - TOUCH: GT911 I2C
 
