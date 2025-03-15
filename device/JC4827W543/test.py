@@ -26,12 +26,28 @@ rect.set_size(size_x, size_y)
 rect.set_pos(0, 0)
 rect.set_style_bg_color(lv.color_make(255, 0, 0), 0) # red
 
+# Добавляем букву R внутри красного квадрата
+label = lv.label(rect)
+label.set_text("R")
+label.center()  # Центрируем букву в квадрате
+label.set_style_text_color(lv.color_make(0, 0, 0), 0)  # Белый цвет для текста
+label.set_style_text_font(lv.font_montserrat_16, 0)  # Larger font
+
+
 print('Right TOP')
 # Right TOP
 rect = lv.obj(scr)
 rect.set_size(size_x, size_y)
 rect.set_pos(WIDTH-size_x, 0)
 rect.set_style_bg_color(lv.color_make(0, 255, 0), 0) # green
+
+# Добавляем букву R внутри красного квадрата
+label = lv.label(rect)
+label.set_text("G")
+label.center()  # Центрируем букву в квадрате
+label.set_style_text_color(lv.color_make(0, 0, 0), 0)  # Белый цвет для текста
+label.set_style_text_font(lv.font_montserrat_16, 0)  # Larger font
+
 
 print('Left BOTTOM')
 # Left BOTTOM
@@ -40,12 +56,27 @@ rect.set_size(size_x, size_y)
 rect.set_pos(0, HEIGHT-size_y)
 rect.set_style_bg_color(lv.color_make(0, 0, 255), 0) # blue
 
+# Добавляем букву R внутри красного квадрата
+label = lv.label(rect)
+label.set_text("B")
+label.center()  # Центрируем букву в квадрате
+label.set_style_text_color(lv.color_make(0, 0, 0), 0)  # Белый цвет для текста
+label.set_style_text_font(lv.font_montserrat_16, 0)  # Larger font
+
 print('Right BOTTOM')
 # Right BOTTOM
 rect = lv.obj(scr)
 rect.set_size(size_x, size_y)
 rect.set_pos(WIDTH-size_x, HEIGHT-size_y)
 rect.set_style_bg_color(lv.color_make(255, 255, 255), 0) # white
+
+# Добавляем букву R внутри красного квадрата
+label = lv.label(rect)
+label.set_text("W")
+label.center()  # Центрируем букву в квадрате
+label.set_style_text_color(lv.color_make(0, 0, 0), 0)  # Белый цвет для текста
+label.set_style_text_font(lv.font_montserrat_16, 0)  # Larger font
+
 
 # Draw cross lines from inner corners to inner corners
 line1 = lv.line(scr)

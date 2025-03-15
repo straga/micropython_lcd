@@ -1,6 +1,11 @@
+# Based on the work by straga (https://github.com/straga)
+# https://github.com/straga/micropython_lcd/blob/master/device/JC3248W535/driver/axs15231b/_axs15231b_init_type1.py
+# Copyright (c) 2024 - 2025 Kevin G. Schlosser
+
 import time
 from micropython import const  # NOQA
 import lvgl as lv  # NOQA
+
 
 AXS_LCD_NOP      = 0x00  # No operation (C)
 AXS_LCD_SWRESET  = 0x01  # Software reset (C)
@@ -60,18 +65,6 @@ def init(self):
     param_buf = bytearray(15)
     param_mv = memoryview(param_buf)
 
-    # Custom CMD sequense
-
-    # # Open Special mode
-    # self.set_params(0xBB, bytearray([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x5A, 0xA5]))
-    # time.sleep_ms(10)
-    #
-    # # self.set_params(0xC1, bytearray([0x33]))
-    # # time.sleep_ms(10)
-    #
-    # # Close Special mode
-    # self.set_params(0xBB, bytearray([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]))
-    # time.sleep_ms(10)
 
     # Color and Orientation
     param_buf[0] = (
@@ -92,10 +85,6 @@ def init(self):
     param_buf[0] = pixel_format
     self.set_params(AXS_LCD_IPF, param_mv[:1])
 
-    # 0xD0 BRIGHTNESS
-    param_buf[0] = 0xD0
-    self.set_params(AXS_LCD_WRDISBV, param_mv[:1])
-
     # # Disable Partial Display Mode (return to Normal Display Mode)
     self.set_params(AXS_LCD_NORON)
     time.sleep_ms(10)
@@ -108,39 +97,7 @@ def init(self):
     self.set_params(AXS_LCD_DISPON)
     time.sleep_ms(150)
 
-    # TEST
-    # print("All pixel RED")
-    # R, G, B = 255, 0, 0  # Full red, no green, no blue #NOAP
-    # param_buf[0] = R
-    # param_buf[1] = G
-    # param_buf[2] = B
-    # self.set_params(0x24, param_mv[:3])  # Send 3 bytes of data (R, G, B)
-    # time.sleep(1)
-    #
-    # print("All pixel GREEN")
-    # R, G, B = 0, 255, 0  # No red, full green, no blue
-    # param_buf[0] = R
-    # param_buf[1] = G
-    # param_buf[2] = B
-    # self.set_params(0x24, param_mv[:3])
-    # time.sleep(1)
-    #
-    # print("All pixel BLUE")
-    # R, G, B = 0, 0, 255  # No red, no green, full blue
-    # param_buf[0] = R
-    # param_buf[1] = G
-    # param_buf[2] = B
-    # self.set_params(0x24, param_mv[:3])
-    # time.sleep(1)
-    #
-    # print("All pixel OFF")
-    # param_buf[:1] = bytearray([0x00])
-    # self.set_params(0x22, param_mv[:1])
-    # time.sleep_ms(200)
-
-
-
-
-
-
-
+    # All Pixels off
+    param_buf[:1] = bytearray([0x00])
+    self.set_params(0x22, param_mv[:1])
+    time.sleep_ms(200)
