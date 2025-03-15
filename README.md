@@ -1,6 +1,9 @@
 # MicroPython LCD Display Project
 
-This project demonstrates how to use a LCD display with MicroPython.
+This project demonstrates how to use a LCD display with LVGL MicroPython.
+
+Kevin G. Schlosser: 
+- https://github.com/lvgl-micropython/lvgl_micropython
 
 ## Hardware
 
