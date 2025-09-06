@@ -1,116 +1,161 @@
 
-from micropython import const # NOQA
+"""
+LVGL Configuration for JC3248W535EN Display
+===========================================
 
-import lcd_bus # NOQA
-from machine import SPI, Pin # NOQA
+Display: JC3248W535EN with AXS15231B controller
+Resolution: 320x480 pixels
+Interface: QSPI (4-wire SPI)
+Touch: AXS15231 capacitive touch controller
 
-import lvgl as lv # NOQA
+Hardware connections:
+- Display: QSPI interface on ESP32-S3
+- Touch: I2C interface
+"""
 
+from micropython import const
+import machine
+import lcd_bus
+import lvgl as lv
+
+# =============================================================================
+# Display Configuration
+# =============================================================================
+
+# Display dimensions
 WIDTH = const(320)
 HEIGHT = const(480)
+_BUFFER_SIZE = WIDTH * HEIGHT * 2  # RGB565 = 2 bytes per pixel
 
-_WIDTH = const(320)
-_HEIGHT = const(480)
+# QSPI Display Pins (JC3248W535EN)
+_SCLK_PIN = const(47)    # QSPI Clock
+_DATA0_PIN = const(21)   # QSPI Data 0 (MOSI equivalent)
+_DATA1_PIN = const(48)   # QSPI Data 1 (MISO equivalent)
+_DATA2_PIN = const(40)   # QSPI Data 2
+_DATA3_PIN = const(39)   # QSPI Data 3
+_CS_PIN = const(45)      # Chip Select
+_DC_PIN = const(8)       # Data/Command
+_BACKLIGHT_PIN = const(1)  # Backlight PWM
+_RESET_PIN = None        # Reset (not connected)
 
-_BUFFER_SIZE = _WIDTH * _HEIGHT * 2
+# Display timing
+_FREQ = const(40000000)  # 40 MHz QSPI frequency
 
+# =============================================================================
+# Touch Configuration  
+# =============================================================================
 
-## Panel
+# I2C Touch Pins (AXS15231 capacitive touch)
+_TOUCH_SDA_PIN = const(4)    # I2C Data
+_TOUCH_SCL_PIN = const(8)    # I2C Clock
 
-# LCD_QSPI_HOST           (SPI2_HOST)     SPI2_HOST=1, ok
+# =============================================================================
+# Hardware Initialization
+# =============================================================================
 
-# PIN_NUM_QSPI_CS         (GPIO_NUM_45) ok
-# PIN_NUM_QSPI_PCLK       (GPIO_NUM_47) ok
-
-# PIN_NUM_QSPI_DATA0      (GPIO_NUM_21) ok
-# PIN_NUM_QSPI_DATA1      (GPIO_NUM_48) ok
-# PIN_NUM_QSPI_DATA2      (GPIO_NUM_40) ok
-# PIN_NUM_QSPI_DATA3      (GPIO_NUM_39) ok
-
-# PIN_NUM_QSPI_RST        (GPIO_NUM_NC) NC
-# PIN_NUM_QSPI_DC         (GPIO_NUM_8) ok
-# PIN_NUM_QSPI_TE         (GPIO_NUM_38)
-# PIN_NUM_QSPI_BL         (GPIO_NUM_1) ok
-
-## Touch
-
-# I2C_NUM                     (I2C_NUM_0) ok
-# I2C_CLK_SPEED_HZ            400000 ok
-
-# PIN_NUM_QSPI_TOUCH_SCL  (GPIO_NUM_8) ok
-# PIN_NUM_QSPI_TOUCH_SDA  (GPIO_NUM_4) ok
-# PIN_NUM_QSPI_TOUCH_RST  (-1)
-# PIN_NUM_QSPI_TOUCH_INT  (-1)
-
-
-
-# SPI bus config
-spi_bus = SPI.Bus(
-    host=1,   # SPI2_HOST
-    mosi=21,  # PIN_NUM_QSPI_DATA0
-    miso=48,  # PIN_NUM_QSPI_DATA1
-    sck=47,   # PIN_NUM_QSPI_PCLK
-    quad_pins=(40, 39)  # PIN_NUM_QSPI_DATA2, PIN_NUM_QSPI_DATA3
+# Initialize QSPI bus for display
+spi_bus = machine.SPI.Bus(
+    host=1,  # SPI2_HOST
+    sck=_SCLK_PIN,
+    quad_pins=(_DATA0_PIN, _DATA1_PIN, _DATA2_PIN, _DATA3_PIN)
 )
 
-# Display bus config
+# Create display bus interface
 display_bus = lcd_bus.SPIBus(
     spi_bus=spi_bus,
-    dc=8,  # PIN_NUM_QSPI_DC 8
-    cs=45,  # PIN_NUM_QSPI_CS
-    freq=40000000,
-    spi_mode=0,
-    quad=True
+    dc=_DC_PIN,
+    cs=_CS_PIN, 
+    freq=_FREQ,
+    spi_mode=3,      # SPI mode 3 (CPOL=1, CPHA=1)
+    quad=True        # Enable QSPI mode (4-wire)
 )
 
-import axs15231b
-
-
+# Allocate frame buffers in SPIRAM for better performance
 fb1 = display_bus.allocate_framebuffer(_BUFFER_SIZE, lcd_bus.MEMORY_SPIRAM)
 fb2 = display_bus.allocate_framebuffer(_BUFFER_SIZE, lcd_bus.MEMORY_SPIRAM)
 
+# =============================================================================
+# Display Driver Setup
+# =============================================================================
+
+import axs15231b
 
 display = axs15231b.AXS15231B(
     display_bus,
     WIDTH,
     HEIGHT,
     frame_buffer1=fb1,
-    frame_buffer2=fb1,
-    backlight_pin=1,
+    frame_buffer2=fb2,
+    backlight_pin=_BACKLIGHT_PIN,
     color_space=lv.COLOR_FORMAT.RGB565,
-    rgb565_byte_swap=True,
+    rgb565_byte_swap=True,           # Required for this display
     backlight_on_state=axs15231b.STATE_PWM
 )
 
-
-print('Hello LCD')
-print(f"Display size: {WIDTH}x{HEIGHT}")
-
+# Initialize display
+print(f"Initializing {WIDTH}x{HEIGHT} QSPI display...")
 display.set_power(True)
-display.set_backlight(80)
-# PWM frequency for backlight
-#display._backlight_pin.freq(2000)
+display.set_backlight(80)  # 80% brightness
+display.init()
+print("Display initialized successfully!")
 
-display.init()  # use 1 type config
+# =============================================================================
+# Touch Controller Setup
+# =============================================================================
 
-#display.set_rotation(lv.DISPLAY_ROTATION._90)  # NOQA
+class TouchCal:
+    """Touch calibration data placeholder"""
+    def __init__(self):
+        # Calibration parameters (not needed for this touch controller)
+        self.alphaX = None
+        self.betaX = None  
+        self.deltaX = None
+        self.alphaY = None
+        self.betaY = None
+        self.deltaY = None
+        self.mirrorX = False
+        self.mirrorY = False
 
+    @staticmethod
+    def save():
+        """Save calibration data (placeholder)"""
+        pass
 
-# TOUCH
-
-# I2C_NUM_0
-# I2C_CLK_SPEED_HZ            400000
-
-# PIN_NUM_QSPI_TOUCH_SCL  (GPIO_NUM_8)
-# PIN_NUM_QSPI_TOUCH_SDA  (GPIO_NUM_4)
-
+# Initialize I2C bus for touch controller
 import axs15231
 from i2c import I2C
 
-i2c_bus = I2C.Bus(host=1, sda=4, scl=8)
+i2c_bus = I2C.Bus(host=1, sda=_TOUCH_SDA_PIN, scl=_TOUCH_SCL_PIN)
 touch_i2c = I2C.Device(i2c_bus, axs15231.I2C_ADDR, axs15231.BITS)
+
+# Create touch input device
+cal = TouchCal()
+touch = axs15231.AXS15231(touch_i2c, touch_cal=cal, debug=False)
+
+# Initialize touch controller
 indev = axs15231.AXS15231(touch_i2c, debug=False)
 indev.enable_input_priority()
 
-print('is_calibrate is', indev.is_calibrated)
+print(f"Touch controller calibrated: {indev.is_calibrated}")
+print("System ready!")
 
+# =============================================================================
+# Usage Notes
+# =============================================================================
+"""
+After importing this module, you can use:
+
+- display: AXS15231B display driver instance
+- touch: AXS15231 touch controller instance  
+- WIDTH, HEIGHT: Display dimensions
+
+Example:
+    import lv_config
+    
+    # Display is automatically initialized
+    # Create LVGL objects and use normally
+    
+    label = lv.label(lv.screen_active())
+    label.set_text("Hello World!")
+    label.center()
+"""
