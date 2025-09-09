@@ -22,9 +22,17 @@ We're using the JC3248W535 LCD display, which is compatible with MicroPython. Th
 <img src="./doc/lcd_1.jpg" alt="LCD Front View" width="33%" />
 <img src="./doc/lcd_2.jpg" alt="LCD Back View" width="33%" />
 
-
 For detailed information about this display, see the [JC3248W535 how to](./device/JC3248W535/README.md).
 
+
+New SPI driver - LVGL - SPI bus driver with partial updates и rotation 90° suport for AXS15231B QSPI display.
+
+
+Software Rotation with new SPI driver
+
+<img src="./doc/lcd_3.jpg" alt="Rotation 90" width="33%" />
+
+see the [JC3248W535 New Spi Driver](./device/JC3248W535/new_SPI/README.md).
 
 
 ### JC4827W543

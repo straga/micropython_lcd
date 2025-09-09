@@ -22,10 +22,10 @@ import lvgl as lv
 # Display Configuration
 # =============================================================================
 
-# Display dimensions
-WIDTH = const(320)
-HEIGHT = const(480)
-_BUFFER_SIZE = WIDTH * HEIGHT * 2  # RGB565 = 2 bytes per pixel
+# Display dimensions (swapped for 90° rotation)
+WIDTH = const(480)   # was 320
+HEIGHT = const(320)  # was 480
+#_BUFFER_SIZE = WIDTH * HEIGHT * 2  # RGB565 = 2 bytes per pixel
 
 # QSPI Display Pins (JC3248W535EN)
 _SCLK_PIN = const(47)    # QSPI Clock
@@ -61,7 +61,7 @@ spi_bus = machine.SPI.Bus(
 )
 
 # Create display bus interface
-display_bus = lcd_bus.SPIBus(
+display_bus = lcd_bus.SPIBusFast(
     spi_bus=spi_bus,
     dc=_DC_PIN,
     cs=_CS_PIN, 
@@ -71,8 +71,8 @@ display_bus = lcd_bus.SPIBus(
 )
 
 # Allocate frame buffers in SPIRAM for better performance
-fb1 = display_bus.allocate_framebuffer(_BUFFER_SIZE, lcd_bus.MEMORY_SPIRAM)
-fb2 = display_bus.allocate_framebuffer(_BUFFER_SIZE, lcd_bus.MEMORY_SPIRAM)
+#fb1 = display_bus.allocate_framebuffer(_BUFFER_SIZE, lcd_bus.MEMORY_SPIRAM)
+#fb2 = display_bus.allocate_framebuffer(_BUFFER_SIZE, lcd_bus.MEMORY_SPIRAM)
 
 # =============================================================================
 # Display Driver Setup
@@ -82,10 +82,10 @@ import axs15231b
 
 display = axs15231b.AXS15231B(
     display_bus,
-    WIDTH,
-    HEIGHT,
-    frame_buffer1=fb1,
-    frame_buffer2=fb2,
+    320,  # Physical width (before rotation)
+    480,  # Physical height (before rotation)
+    #frame_buffer1=fb1,
+    #frame_buffer2=fb2,
     backlight_pin=_BACKLIGHT_PIN,
     color_space=lv.COLOR_FORMAT.RGB565,
     rgb565_byte_swap=True,           # Required for this display
@@ -97,7 +97,10 @@ print(f"Initializing {WIDTH}x{HEIGHT} QSPI display...")
 display.set_power(True)
 display.set_backlight(80)  # 80% brightness
 display.init()
-print("Display initialized successfully!")
+
+# Set 90-degree rotation (landscape mode)
+display.set_rotation(lv.DISPLAY_ROTATION._90)
+print("Display initialized successfully with 90° rotation!")
 
 # =============================================================================
 # Touch Controller Setup
@@ -122,7 +125,7 @@ class TouchCal:
         pass
 
 # Initialize I2C bus for touch controller
-import axs15231
+import device.JC3248W535.default_SPI.axs15231 as axs15231
 from i2c import I2C
 
 i2c_bus = I2C.Bus(host=1, sda=_TOUCH_SDA_PIN, scl=_TOUCH_SCL_PIN)
