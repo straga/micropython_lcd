@@ -10,7 +10,11 @@
 
 ### Build
 ```
-python3 make.py esp32 BOARD=ESP32_GENERIC_S3 BOARD_VARIANT=SPIRAM_OCT --flash-size=16
+with my frozen
+python3 make.py esp32 BOARD=ESP32_GENERIC_S3 BOARD_VARIANT=SPIRAM_OCT --flash-size=16 DISPLAY=axs15231b INDEV=axs15231 --skip-partition-resize --partition-size=4194304 --ota FROZEN_MANIFEST='/my/manifest.py'
+
+just build
+python3 make.py esp32 BOARD=ESP32_GENERIC_S3 BOARD_VARIANT=SPIRAM_OCT --flash-size=16 DISPLAY=axs15231b INDEV=axs15231 --skip-partition-resize --partition-size=4194304 --ota
 ```
 
 ### Flash
