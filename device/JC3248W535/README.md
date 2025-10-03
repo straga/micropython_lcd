@@ -8,6 +8,9 @@
 - TOUCH: axs15231b I2C
 
 
+### firmware source
+https://github.com/straga/lvgl_micropython/tree/feature/spi_bus_fast
+
 ### Build
 ```
 with my frozen
