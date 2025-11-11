@@ -3,7 +3,11 @@ import i2c
 import lcd_bus
 import lvgl as lv  # NOQA
 import machine
+
 from micropython import const
+
+import nv3041aG as nv3041a  # NOQA
+
 
 WIDTH = 480
 HEIGHT = 272
@@ -61,7 +65,6 @@ display_bus = lcd_bus.SPIBus(
 
 fb1 = display_bus.allocate_framebuffer(_BUFFER_SIZE, lcd_bus.MEMORY_SPIRAM)
 
-import nv3041aG as nv3041a  # NOQA
 
 display = nv3041a.NV3041A(
     data_bus=display_bus,
