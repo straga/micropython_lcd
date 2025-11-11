@@ -1,8 +1,9 @@
+import gt911
+import i2c
 import lcd_bus
-from micropython import const
-import machine
 import lvgl as lv  # NOQA
-
+import machine
+from micropython import const
 
 WIDTH = 480
 HEIGHT = 272
@@ -51,21 +52,16 @@ disp_spi_bus = machine.SPI.Bus(
     mosi=_LCD_A0,
     miso=_LCD_A1,
     sck=_LCD_CLK,
-    quad_pins=(_LCD_A2, _LCD_A3)
+    quad_pins=(_LCD_A0, _LCD_A1, _LCD_A2, _LCD_A3), # quad wait 4 arguments
 )
 
 display_bus = lcd_bus.SPIBus(
-    spi_bus=disp_spi_bus,
-    dc=-1,
-    freq=_LCD_FREQ,
-    cs=_LCD_CS,
-    quad=True
+    spi_bus=disp_spi_bus, dc=-1, freq=_LCD_FREQ, cs=_LCD_CS, quad=True
 )
 
 fb1 = display_bus.allocate_framebuffer(_BUFFER_SIZE, lcd_bus.MEMORY_SPIRAM)
 
-import nv3041aG as nv3041a # NOQA
-
+import nv3041aG as nv3041a  # NOQA
 
 display = nv3041a.NV3041A(
     data_bus=display_bus,
@@ -88,13 +84,11 @@ display.init(3)
 display._backlight_pin.freq(5000)
 display.set_backlight(80)
 
-import gt911
-import i2c
 
-TOUCH_SCL  = 4
-TOUCH_SDA  = 8
-TOUCH_RES  = 38
-TOUCH_INT  = 3
+TOUCH_SCL = 4
+TOUCH_SDA = 8
+TOUCH_RES = 38
+TOUCH_INT = 3
 
 i2c_bus = i2c.I2C.Bus(host=1, scl=TOUCH_SCL, sda=TOUCH_SDA, use_locks=True)
 touch_i2c = i2c.I2C.Device(i2c_bus, gt911.I2C_ADDR, gt911.BITS)

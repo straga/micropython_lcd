@@ -1,12 +1,12 @@
 # Copyright (c) 2024 - 2025 Kevin G. Schlosser
 
-import display_driver_framework
-import rgb_display_framework  # NOQA
-from micropython import const  # NOQA
-import lcd_bus
-import lvgl as lv
 import gc
 
+import display_driver_framework
+import lcd_bus
+import lvgl as lv
+import rgb_display_framework  # NOQA
+from micropython import const  # NOQA
 
 STATE_HIGH = display_driver_framework.STATE_HIGH
 STATE_LOW = display_driver_framework.STATE_LOW
@@ -43,7 +43,7 @@ class NV3041A(display_driver_framework.DisplayDriver):
         0,
         _MADCTL_MV,
         _MADCTL_MX | _MADCTL_MY,
-        _MADCTL_MV | _MADCTL_MX | _MADCTL_MY
+        _MADCTL_MV | _MADCTL_MX | _MADCTL_MY,
     )
 
     @staticmethod
@@ -92,7 +92,11 @@ class NV3041A(display_driver_framework.DisplayDriver):
             # buffer is using a quad spi bus. we don't want it to create
             # partial buffers for the quad SPI display
 
-            buf_size = display_width * display_height * lv.color_format_get_size(color_space)
+            buf_size = (
+                display_width
+                * display_height
+                * lv.color_format_get_size(color_space)
+            )
 
             if frame_buffer1 is None:
                 gc.collect()
@@ -101,29 +105,31 @@ class NV3041A(display_driver_framework.DisplayDriver):
                     lcd_bus.MEMORY_INTERNAL | lcd_bus.MEMORY_DMA,
                     lcd_bus.MEMORY_SPIRAM | lcd_bus.MEMORY_DMA,
                     lcd_bus.MEMORY_INTERNAL,
-                    lcd_bus.MEMORY_SPIRAM
+                    lcd_bus.MEMORY_SPIRAM,
                 ):
                     try:
-                        frame_buffer1 = (
-                            data_bus.allocate_framebuffer(buf_size, flags)
+                        frame_buffer1 = data_bus.allocate_framebuffer(
+                            buf_size, flags
                         )
 
                         if (flags | lcd_bus.MEMORY_DMA) == flags:
-                            frame_buffer2 = (
-                                data_bus.allocate_framebuffer(buf_size, flags)
+                            frame_buffer2 = data_bus.allocate_framebuffer(
+                                buf_size, flags
                             )
 
                         break
                     except MemoryError:
-                        frame_buffer1 = data_bus.free_framebuffer(frame_buffer1)  # NOQA
+                        frame_buffer1 = data_bus.free_framebuffer(
+                            frame_buffer1
+                        )  # NOQA
 
                 if frame_buffer1 is None:
                     raise MemoryError(
-                        f'Unable to allocate memory for frame buffer ({buf_size})'  # NOQA
+                        f"Unable to allocate memory for frame buffer ({buf_size})"  # NOQA
                     )
 
                 if len(frame_buffer1) != buf_size:
-                    raise ValueError('incorrect framebuffer size')
+                    raise ValueError("incorrect framebuffer size")
         else:
             self.__cmd_modifier = self.__dummy_cmd_modifier
             self.__color_cmd_modifier = self.__dummy_cmd_modifier
@@ -134,14 +140,15 @@ class NV3041A(display_driver_framework.DisplayDriver):
         self.__ramwrc = self.__color_cmd_modifier(_RAMWRC)
         self.__caset = self.__cmd_modifier(_CASET)
         self.__flush_ready_count = 0
-        
+
         # Optimize chunk size calculations
         bytes_per_pixel = lv.color_format_get_size(color_space)
         total_pixels = display_width * display_height
         self.__chunk_size = const(1024 * 10)  # 10KB chunks
         self.__total_size = total_pixels * bytes_per_pixel
-        self.__num_chunks = (self.__total_size + self.__chunk_size - 1) // self.__chunk_size
-
+        self.__num_chunks = (
+            self.__total_size + self.__chunk_size - 1
+        ) // self.__chunk_size
 
         super().__init__(
             data_bus,
@@ -163,7 +170,7 @@ class NV3041A(display_driver_framework.DisplayDriver):
             rgb565_byte_swap,
             _cmd_bits=_cmd_bits,
             _param_bits=8,
-            _init_bus=True
+            _init_bus=True,
         )
 
     def _flush_ready_cb(self, *_):
@@ -214,12 +221,23 @@ class NV3041A(display_driver_framework.DisplayDriver):
 
         while remaining > 0:
             chunk_size = min(self.__chunk_size, remaining)
-            chunk = data_view[offset:offset + chunk_size]
-            
+            chunk = data_view[offset: offset + chunk_size]
+
             if offset == 0:
-                self._data_bus.tx_color(self.__ramwr, chunk, x1, y1, x2, y2, self._rotation, False)
+                self._data_bus.tx_color(
+                    self.__ramwr, chunk, x1, y1, x2, y2, self._rotation, False
+                )
             else:
-                self._data_bus.tx_color(self.__ramwrc, chunk, x1, y1, x2, y2, self._rotation, self._disp_drv.flush_is_last())
-            
+                self._data_bus.tx_color(
+                    self.__ramwrc,
+                    chunk,
+                    x1,
+                    y1,
+                    x2,
+                    y2,
+                    self._rotation,
+                    self._disp_drv.flush_is_last(),
+                )
+
             offset += chunk_size
             remaining -= chunk_size
