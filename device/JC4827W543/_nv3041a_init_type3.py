@@ -1,10 +1,10 @@
 # Copyright (c) 2024 - 2025 Kevin G. Schlosser
 
-from micropython import const  # NOQA
 import time
-import lvgl as lv
-import lcd_bus
 
+import lcd_bus
+import lvgl as lv
+from micropython import const  # NOQA
 
 _NOP = const(0x00)
 _RD_SYSID = const(0x04)
@@ -156,21 +156,20 @@ def init(self):
         COLMOD = 0x00
     else:
         raise RuntimeError(
-            'NV3401A IC only supports '
-            'lv.COLOR_FORMAT.RGB888 and lv.COLOR_FORMAT.RGB565'
+            "NV3401A IC only supports "
+            "lv.COLOR_FORMAT.RGB888 and lv.COLOR_FORMAT.RGB565"
         )
-
 
     param_buf[0] = 0xA5
     self.set_params(0xFF, param_mv[:1])
 
-    param_buf[0] = 0xC0 # rotation 180
+    param_buf[0] = 0xC0  # rotation 180
     self.set_params(_MADCTL, param_mv[:1])
 
     param_buf[0] = COLMOD
     self.set_params(_COLMOD, param_mv[:1])
 
-    param_mv[0] = 0x01 # add inversion
+    param_mv[0] = 0x01  # add inversion
     self.set_params(_INVON, param_mv[:1])
 
     param_buf[0] = 0x15
